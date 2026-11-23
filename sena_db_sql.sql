@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 23-11-2026 a las 21:12:17
+-- Tiempo de generación: 23-11-2026 a las 23:29:59
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de datos: `sena_db_sql`
+-- Base de datos: `db_sena_sql`
 --
 
 -- --------------------------------------------------------
@@ -32,7 +32,7 @@ CREATE TABLE `ficha_grupos` (
   `fecha_inicio` date NOT NULL,
   `fecha_fin` date NOT NULL,
   `numero_de_ficha` int(10) NOT NULL,
-  `id_aprendiz` varchar(10) NOT NULL,
+  `id_aprendiz` int(10) NOT NULL,
   `programa` varchar(50) NOT NULL,
   `id_instructor` int(10) NOT NULL,
   `estado` int(1) NOT NULL
@@ -43,16 +43,16 @@ CREATE TABLE `ficha_grupos` (
 --
 
 INSERT INTO `ficha_grupos` (`id_ficha`, `fecha_inicio`, `fecha_fin`, `numero_de_ficha`, `id_aprendiz`, `programa`, `id_instructor`, `estado`) VALUES
-(1, '2026-02-01', '2027-08-01', 2873451, '1', 'analisis y desarrollo de software', 1, 1),
-(2, '2026-02-01', '2027-08-01', 2873452, '2', 'analisis y desarrollo de software', 2, 1),
-(3, '2026-02-01', '2027-08-01', 2873453, '3', 'analisis y desarrollo de software', 3, 1),
-(4, '2026-02-01', '2027-08-01', 2873454, '4', 'analisis y desarrollo de software', 4, 1),
-(5, '2026-02-01', '2027-08-01', 2873455, '5', 'analisis y desarrollo de software', 5, 1),
-(6, '2026-03-01', '2027-09-01', 2873456, '6', 'analisis y desarrollo de software', 6, 1),
-(7, '2026-03-01', '2027-09-01', 2873457, '7', 'analisis y desarrollo de software', 7, 1),
-(8, '2026-03-01', '2027-09-01', 2873458, '8', 'analisis y desarrollo de software', 8, 1),
-(9, '2026-03-01', '2027-09-01', 2873459, '9', 'analisis y desarrollo de software', 9, 1),
-(10, '2026-03-01', '2027-09-01', 2873460, '10', 'analisis y desarrollo de software', 10, 1);
+(1, '2026-02-01', '2027-08-01', 2873451, 1, 'analisis y desarrollo de software', 1, 1),
+(2, '2026-02-01', '2027-08-01', 2873452, 2, 'analisis y desarrollo de software', 2, 1),
+(3, '2026-02-01', '2027-08-01', 2873453, 3, 'analisis y desarrollo de software', 3, 1),
+(4, '2026-02-01', '2027-08-01', 2873454, 4, 'analisis y desarrollo de software', 4, 1),
+(5, '2026-02-01', '2027-08-01', 2873455, 5, 'analisis y desarrollo de software', 5, 1),
+(6, '2026-03-01', '2027-09-01', 2873456, 6, 'analisis y desarrollo de software', 6, 1),
+(7, '2026-03-01', '2027-09-01', 2873457, 7, 'analisis y desarrollo de software', 7, 1),
+(8, '2026-03-01', '2027-09-01', 2873458, 8, 'analisis y desarrollo de software', 8, 1),
+(9, '2026-03-01', '2027-09-01', 2873459, 9, 'analisis y desarrollo de software', 9, 1),
+(10, '2026-03-01', '2027-09-01', 2873460, 10, 'analisis y desarrollo de software', 10, 1);
 
 -- --------------------------------------------------------
 
@@ -191,13 +191,15 @@ INSERT INTO `tb_competencia` (`id_competencia`, `competencia`, `cod_compe`, `des
 --
 ALTER TABLE `ficha_grupos`
   ADD PRIMARY KEY (`id_ficha`),
-  ADD KEY `id_instructor` (`id_instructor`);
+  ADD KEY `id_instructor` (`id_instructor`),
+  ADD KEY `id_aprendiz` (`id_aprendiz`);
 
 --
 -- Indices de la tabla `instructores`
 --
 ALTER TABLE `instructores`
-  ADD PRIMARY KEY (`id_instructor`);
+  ADD PRIMARY KEY (`id_instructor`),
+  ADD KEY `fk_instructor_ficha` (`id_ficha`);
 
 --
 -- Indices de la tabla `tb_administrativos`
@@ -215,7 +217,9 @@ ALTER TABLE `tb_aprendices`
 -- Indices de la tabla `tb_competencia`
 --
 ALTER TABLE `tb_competencia`
-  ADD PRIMARY KEY (`id_competencia`);
+  ADD PRIMARY KEY (`id_competencia`),
+  ADD KEY `fk_competencia_instructor` (`id_instructor`),
+  ADD KEY `fk_competencia_aprendiz` (`id_aprendiz`);
 
 --
 -- Restricciones para tablas volcadas
@@ -225,14 +229,28 @@ ALTER TABLE `tb_competencia`
 -- Filtros para la tabla `ficha_grupos`
 --
 ALTER TABLE `ficha_grupos`
+  ADD CONSTRAINT `fk_ficha_aprendiz` FOREIGN KEY (`id_aprendiz`) REFERENCES `tb_aprendices` (`id_aprendiz`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_ficha_competencia` FOREIGN KEY (`id_ficha`) REFERENCES `tb_competencia` (`id_competencia`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_ficha_instructor` FOREIGN KEY (`id_instructor`) REFERENCES `instructores` (`id_instructor`) ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `instructores`
+--
+ALTER TABLE `instructores`
+  ADD CONSTRAINT `fk_instructor_ficha` FOREIGN KEY (`id_ficha`) REFERENCES `ficha_grupos` (`id_ficha`) ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `tb_aprendices`
 --
 ALTER TABLE `tb_aprendices`
   ADD CONSTRAINT `fk_aprendiz_ficha` FOREIGN KEY (`id_aprendiz`) REFERENCES `ficha_grupos` (`id_ficha`) ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `tb_competencia`
+--
+ALTER TABLE `tb_competencia`
+  ADD CONSTRAINT `fk_competencia_aprendiz` FOREIGN KEY (`id_aprendiz`) REFERENCES `tb_aprendices` (`id_aprendiz`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_competencia_instructor` FOREIGN KEY (`id_instructor`) REFERENCES `instructores` (`id_instructor`) ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
